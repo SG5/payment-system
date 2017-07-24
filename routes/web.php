@@ -21,3 +21,5 @@ $app->group(['prefix' => 'account'], function () use ($app) {
     $app->put('{id:[1-9]\d*}/refill', 'AccountController@refill');
     $app->put('{id:[1-9]\d*}/transaction', 'AccountController@transaction');
 });
+
+$app->post('currency/{code:[A-Z]{3}}/rate', 'CurrencyController@createRate');
