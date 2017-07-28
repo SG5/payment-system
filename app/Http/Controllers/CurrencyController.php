@@ -25,7 +25,7 @@ class CurrencyController extends Controller
 
         $validator = Validator::make($data, CurrencyRate::$rules);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['error' => $validator->errors()], 400);
         }
 
         $account = CurrencyRate::create($data);

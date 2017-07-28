@@ -32,7 +32,7 @@ class AccountController extends Controller
 
         $validator = Validator::make($data, Account::$rules);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['error' => $validator->errors()], 400);
         }
 
         $account = Account::create($data);
@@ -43,8 +43,14 @@ class AccountController extends Controller
 
     public function refill($id, Request $request)
     {
+        if (empty($request->input('amount'))) {
+            return response()->json([
+                'error' => 'amount is required',
+            ], 400);
+        }
+
         $account = Account::where('id', $id)->lockForUpdate()->firstOrFail();
-        $account->amount += $request->amount;
+        $account->amount += $request->input('amount');
         $account->save();
 
         return response()->json([
