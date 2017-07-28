@@ -15,7 +15,11 @@ class CreateAccountHistoryTable extends Migration
     {
         Schema::create('account_history', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('account_id');
+            $table->decimal('change');
             $table->timestamps();
+
+            $table->foreign('account_id')->references('id')->on('account');
         });
     }
 

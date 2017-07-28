@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\AccountSaved;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class Account extends Model
 {
@@ -18,6 +17,22 @@ class Account extends Model
 
     protected $table = 'account';
     protected $fillable = ['name', 'country', 'city', 'currency_id', 'amount'];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::saved(function($account){
+            $change = $account->getAttribute('amount') - $account->getOriginal('amount');
+
+            if ($change) {
+                AccountHistory::create([
+                    'account_id' => $account->getAttribute('id'),
+                    'change' => $change,
+                ]);
+            }
+        });
+    }
 
     public function currency()
     {
