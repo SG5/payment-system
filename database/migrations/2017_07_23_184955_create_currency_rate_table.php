@@ -20,6 +20,7 @@ class CreateCurrencyRateTable extends Migration
             $table->date('date');
             $table->timestamps();
 
+            $table->unique(['currency_id', 'date']);
             $table->foreign('currency_id')->references('id')->on('currency');
         });
     }

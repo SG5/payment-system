@@ -14,10 +14,9 @@
 use App\Models\Currency;
 
 $factory->define(App\Models\CurrencyRate::class, function (Faker\Generator $faker) {
-    $q = 1;
     return [
         'currency_id' => Currency::where('id', '>', mt_rand(1, 5))->skip(mt_rand(1, 5))->firstOrFail()->id,
         'rate' => mt_rand(3000, 6000)/100,
-        'date' => $faker->unique()->dateTimeBetween('-90 days')->format('Y-m-d'),
+        'date' => $faker->unique()->date('Y-m-d', '+1 years'),
     ];
 });
