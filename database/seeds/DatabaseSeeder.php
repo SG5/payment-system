@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Models\CurrencyRate::class, 1000)->create();
+        factory(App\Models\Account::class, 50)->create();
+        factory(App\Models\CurrencyRate::class, 300)->create();
     }
 }

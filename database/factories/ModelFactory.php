@@ -20,3 +20,12 @@ $factory->define(App\Models\CurrencyRate::class, function (Faker\Generator $fake
         'date' => $faker->unique()->date('Y-m-d', '+1 years'),
     ];
 });
+
+$factory->define(App\Models\Account::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->name,
+        'country' => $faker->country,
+        'city' => $faker->city,
+        'currency_id' => Currency::where('id', '>', mt_rand(1, 5))->skip(mt_rand(1, 5))->firstOrFail()->id,
+    ];
+});
