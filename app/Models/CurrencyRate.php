@@ -17,4 +17,21 @@ class CurrencyRate extends Model
     {
         return $this->hasOne(Currency::class);
     }
+
+    /**
+     * Rate for current date
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeCurrentRate($query)
+    {
+        $actualRates = self::where('date', '<=', date('Y-m-h'))
+            ->groupBy('currency_id')
+            ->get()
+            ->pluck('id')
+            ->all()
+        ;
+        return $query->whereIn('id', $actualRates);
+    }
 }

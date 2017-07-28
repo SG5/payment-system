@@ -74,6 +74,8 @@ class AccountController extends Controller
             $accountFrom = Account::where('id', $id)->lockForUpdate()->firstOrFail();
         }
 
+        $rates = Currency::whereIn('id' [1])->rates()->currentRate();
+
         $accountFrom->amount -= $request->amount;
         $accountTo->amount += $request->amount;
 
