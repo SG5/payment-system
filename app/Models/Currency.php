@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Currency extends Model
 {
+    const USD_ID = 149;
+
     protected $table = 'currency';
     protected $fillable = ['code'];
 

@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Models;
+use App\Exceptions\CurrencyRateNotFoundException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class CurrencyRate extends Model
 {
@@ -26,12 +28,43 @@ class CurrencyRate extends Model
      */
     public function scopeCurrentRate($query)
     {
-        $actualRates = self::where('date', '<=', date('Y-m-h'))
+        $actualRates = self::select(DB::raw('currency_id, MAX(date) as date'))
+            ->where('date', '<=', date('Y-m-d'))
             ->groupBy('currency_id')
             ->get()
-            ->pluck('id')
+            ->pluck('date', 'currency_id')
             ->all()
         ;
-        return $query->whereIn('id', $actualRates);
+        return $query->whereIn('date', $actualRates)
+            ->whereIn('currency_id', array_keys($actualRates));
+    }
+
+    public static function getRate(int $currencyOne, int $currencyTwo): float
+    {
+        if ($currencyOne === $currencyTwo) {
+            return 1;
+        }
+
+        $rates = CurrencyRate::whereIn('currency_id', [$currencyOne,$currencyTwo])
+            ->currentRate()
+            ->get()
+            ->pluck('rate', 'currency_id')
+            ->all();
+
+        if (Currency::USD_ID === $currencyOne) {
+            if (empty($rates[$currencyTwo])) {
+                throw new CurrencyRateNotFoundException('', $currencyTwo);
+            }
+            return $rates[$currencyTwo];
+        }
+
+        if (Currency::USD_ID === $currencyTwo) {
+            if (empty($rates[$currencyOne])) {
+                throw new CurrencyRateNotFoundException('', $currencyOne);
+            }
+            return $rates[$currencyOne];
+        }
+
+        return $rates[$currencyTwo]/$rates[$currencyOne];
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CurrencyRateNotFoundException;
 use App\Models\Account;
 use App\Models\Currency;
+use App\Models\CurrencyRate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +26,7 @@ class AccountController extends Controller
             try {
                 $data['currency_id'] = Currency::where('code', $data['currency'])->firstOrFail()->id;
             } catch (ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => 'Unknown currency',
-                ], 400);
+                return abort(400, 'Unknown currency');
             }
         }
 
@@ -44,9 +44,7 @@ class AccountController extends Controller
     public function refill($id, Request $request)
     {
         if (empty($request->input('amount'))) {
-            return response()->json([
-                'error' => 'amount is required',
-            ], 400);
+            return abort(400, 'Amount is required');
         }
 
         $account = Account::where('id', $id)->lockForUpdate()->firstOrFail();
@@ -62,10 +60,12 @@ class AccountController extends Controller
     public function transaction($id, Request $request)
     {
         if ((int)$id === (int)$request->to) {
-            return response()->json([
-                'error' => 'Accounts is equal',
-            ], 409);
+            return abort(409, 'Accounts is equal');
         }
+        if (empty($request->input('amount'))) {
+            return abort(400, 'Amount is required');
+        }
+
         if ($id < $request->to) {
             $accountFrom = Account::where('id', $id)->lockForUpdate()->firstOrFail();
             $accountTo = Account::where('id', $request->to)->lockForUpdate()->firstOrFail();
@@ -74,10 +74,18 @@ class AccountController extends Controller
             $accountFrom = Account::where('id', $id)->lockForUpdate()->firstOrFail();
         }
 
-        $rates = Currency::whereIn('id' [1])->rates()->currentRate();
+        if ($accountFrom->amount < $request->amount) {
+            return abort(402, 'Not enough money');
+        }
+
+        try {
+            $rate = CurrencyRate::getRate($accountFrom->currency_id, $accountTo->currency_id);
+        } catch (CurrencyRateNotFoundException $e) {
+            return abort(503, 'Unknown rate for currency');
+        }
 
         $accountFrom->amount -= $request->amount;
-        $accountTo->amount += $request->amount;
+        $accountTo->amount += $request->amount * $rate;
 
         DB::transaction(function () use ($accountFrom, $accountTo) {
             $accountFrom->save();
