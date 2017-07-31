@@ -11,9 +11,8 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    return $app->version();
-});
+$app->get('/', 'ReportController@indexPage');
+$app->get('/report', 'ReportController@report');
 
 $app->group(['prefix' => 'account'], function () use ($app) {
     $app->post('', 'AccountController@create');

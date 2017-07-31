@@ -23,7 +23,7 @@ $factory->define(App\Models\CurrencyRate::class, function (Faker\Generator $fake
 
 $factory->define(App\Models\Account::class, function (Faker\Generator $faker) {
     return [
-        'name' => $faker->name,
+        'name' => $faker->unique()->name,
         'country' => $faker->country,
         'city' => $faker->city,
         'currency_id' => Currency::where('id', '>', mt_rand(1, 5))->skip(mt_rand(1, 5))->firstOrFail()->id,

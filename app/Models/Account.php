@@ -22,13 +22,18 @@ class Account extends Model
     {
         parent::boot();
 
-        self::saved(function($account){
+        self::saving(function($account){
             $change = $account->getAttribute('amount') - $account->getOriginal('amount');
 
             if ($change) {
+                $rateUsd = CurrencyRate::where('currency_id', $account->currency_id)
+                    ->currentRate()
+                    ->firstOrFail()->rate;
+
                 AccountHistory::create([
-                    'account_id' => $account->getAttribute('id'),
+                    'account_id' => $account->id,
                     'change' => $change,
+                    'change_usd' => $change * $rateUsd,
                 ]);
             }
         });

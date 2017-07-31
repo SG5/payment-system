@@ -17,6 +17,7 @@ class CreateAccountHistoryTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('account_id');
             $table->decimal('change');
+            $table->decimal('change_usd');
             $table->timestamps();
 
             $table->foreign('account_id')->references('id')->on('account');
