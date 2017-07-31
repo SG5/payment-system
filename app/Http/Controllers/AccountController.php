@@ -59,11 +59,14 @@ class AccountController extends Controller
 
     public function transaction($id, Request $request)
     {
-        if ((int)$id === (int)$request->to) {
-            return abort(409, 'Accounts is equal');
+        if (empty($request->input('to'))) {
+            return abort(400, 'Another account is required');
         }
         if (empty($request->input('amount'))) {
             return abort(400, 'Amount is required');
+        }
+        if ((int)$id === (int)$request->to) {
+            return abort(409, 'Accounts is equal');
         }
 
         if ($id < $request->to) {
