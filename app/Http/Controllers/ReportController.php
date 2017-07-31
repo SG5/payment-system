@@ -14,6 +14,35 @@ class ReportController extends Controller
         return view('reportIndex', ['name' => 'James']);
     }
 
+    public function displayReport(Request $request)
+    {
+        $data = $this->report($request);
+        $data['downloadUrl'] = '/report-download?' . http_build_query($request->query());
+        return view('reportResult', $data);
+    }
+
+    public function downloadReport(Request $request)
+    {
+        header('Content-Type: text/csv');
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Description: File Transfer');
+        header('Content-Disposition: attachment; filename="report.csv');
+
+        $data = $this->report($request);
+        $out = fopen('php://output', 'w');
+        foreach($data['history'] as $item) {
+            fputcsv($out, [
+                $item->created_at,
+                $item->change,
+                $item->change_usd,
+            ]);
+        }
+        fputcsv($out, [
+            '', $data['total'], $data['totalUsd']
+        ]);
+        fclose($out);
+    }
+
     public function report(Request $request)
     {
         if (empty($request->input('name'))) {
@@ -35,10 +64,10 @@ class ReportController extends Controller
 
         $history = $history->get();
 
-        return view('reportResult', [
+        return [
             'history' => $history,
             'total' => $history->sum('change'),
             'totalUsd' => $history->sum('change_usd'),
-        ]);
+        ];
     }
 }

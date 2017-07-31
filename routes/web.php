@@ -12,7 +12,8 @@
 */
 
 $app->get('/', 'ReportController@indexPage');
-$app->get('/report', 'ReportController@report');
+$app->get('/report', 'ReportController@displayReport');
+$app->get('/report-download', 'ReportController@downloadReport');
 
 $app->group(['prefix' => 'account'], function () use ($app) {
     $app->post('', 'AccountController@create');

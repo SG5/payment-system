@@ -25,3 +25,4 @@
     </tr>
     </tbody>
 </table>
+<a href="<?=$downloadUrl?>" target="_blank">Download</a>
